@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+@layer base {
+
+  :root {
+    /* Name: custom color palette
+       Author: Ilias Ism
+       URL: https://gradient.page */
+
+    /* CSS: .bg-gradient { background: var(--gradient) } */
+    --gradient: #e65c00;
+
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 3.9%;
+
+    --card: 25 40% 95%;
+    --card-foreground: 222.2 84% 3.9%;
+ 
+    --popover: 25 40% 95%;
+    --popover-foreground: 222.2 84% 3.9%;
+ 
+    --primary: 25 100% 45%;
+    --primary-foreground: 25 10% 97.25%;
+ 
+    --secondary: 25 30% 90.5%;
+    --secondary-foreground: 222.2 0% 20%;
+ 
+    --muted: 25 40% 90.1%;
+    --muted-foreground: 222.2 0% 40%;
+ 
+    --accent: 25 45% 92.1%;
+    --accent-foreground: 222.2 0% 20%;
+ 
+    --destructive: 0, 72%, 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 25 50% 80.5%;
+    --input: 25 50% 80.5%;
+    --ring: 25 100% 45%;
+ 
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --gradient: #e65c00;
+
+    --background: 15 65% 3.6%;
+    --foreground: 25 10% 97.25%;
+
+    --card: 25 45% 5.8500000000000005%;
+    --card-foreground: 25 10% 97.25%;
+
+    --popover: 25 45% 5.8500000000000005%;
+    --popover-foreground: 25 10% 97.25%;
+
+    --primary: 25 100% 45%;
+    --primary-foreground: 25 10% 97.25%;
+
+    --secondary: 25 50% 13.5%;
+    --secondary-foreground: 25 10% 97.25%;
+
+    --muted: 25 50% 13.5%;
+    --muted-foreground: 25 10% 54.5%;
+
+    --accent: 25 50% 13.5%;
+    --accent-foreground: 25 10% 97.25%;
+
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 25 10% 97.25%;
+
+    --border: 25 50% 13.5%;
+    --input: 25 50% 13.5%;
+    --ring: 25 100% 45%;
+
+    --radius: 0.5rem;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  :root, html, body {
+    @apply scroll-smooth min-h-[100svh] w-full
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* width */
+::-webkit-scrollbar {
+  @apply w-[4px] h-[4px] ;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+  @apply bg-accent
+  }
+  
+  ::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-[5px]
+  }
+
+.dotPattern {
+  background-image: radial-gradient(rgb(35, 40, 68) 1px, transparent 1px);
+  background-size: 25px 25px;
+}
