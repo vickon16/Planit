@@ -467,7 +467,7 @@ export const checkSubAccountSubscription = async (subAccountId: string) => {
   )
     subAccountAccess = false;
 
-  return {subAccount, user, subAccountAccess}
+  return { subAccount, user, subAccountAccess };
 };
 
 // Crud AgencyTeam
@@ -661,6 +661,36 @@ export const cancelSubscription = async (
 };
 
 // Media
+
+export const getMedia = async (type: TPlanitAccounts, accountId: string) => {
+  if (!accountId) return;
+
+  let media;
+
+  if (type === "agency") {
+    const agency = await db.agency.findUnique({
+      where: { id: accountId },
+      include: { planitAccount: { include: { planitMedia: true } } },
+    });
+
+    media = agency?.planitAccount?.planitMedia;
+  } else {
+    const subAccount = await db.subAccount.findUnique({
+      where: { id: accountId },
+      include: {
+        agency: {
+          include: { planitAccount: { include: { planitMedia: true } } },
+        },
+      },
+    });
+    
+    media = subAccount?.agency.planitAccount?.planitMedia?.filter(
+      (media) => media.mediaType === "SUBACCOUNT_MEDIA"
+    );
+  }
+
+  return media;
+};
 
 export const createMedia = async (
   type: TPlanitAccounts,
@@ -974,7 +1004,7 @@ export const createFunnelPage = async (
   funnelId: string,
   values: TFunnelPageFormSchema
 ) => {
-await checkSession();
+  await checkSession();
 
   const funnel = await db.funnel.findUnique({
     where: { id: funnelId },

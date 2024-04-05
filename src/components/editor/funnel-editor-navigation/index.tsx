@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { FocusEventHandler, useEffect } from "react";
 import { toast } from "sonner";
 import { updateFunnelPage } from "@/lib/queries";
-import { Switch } from "../ui/switch";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -73,8 +73,8 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
   };
 
   const handlePreviewClick = () => {
-    toggleLiveMode();
-    togglePreviewMode();
+    toggleLiveMode(true);
+    togglePreviewMode(true);
   };
 
   const handleSave = async () => {
@@ -100,7 +100,7 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
     <TooltipProvider>
       <nav
         className={cn(
-          "border-b-[1px] flex items-center justify-between p-6 gap-2 transition-all",
+          "border-b-[1px] flex items-center justify-between px-4 h-[90px] gap-2 transition-all",
           { "!h-0 !p-0 !overflow-hidden": editor.previewMode }
         )}
       >

@@ -1,5 +1,7 @@
 import ClientOnly from "@/components/client-only";
-import FunnelEditorNavigation from "@/components/editor/funnel-editor-navitation";
+import FunnelEditor from "@/components/editor/funnel-editor";
+import FunnelEditorNavigation from "@/components/editor/funnel-editor-navigation";
+import FunnelEditorSidebar from "@/components/editor/funnel-editor-sidebar";
 import Heading from "@/components/heading";
 import { appLinks } from "@/lib/appLinks";
 import { db } from "@/lib/db";
@@ -37,7 +39,7 @@ const EditorPage = async ({ searchParams }: Props) => {
   }
 
   const funnelPage = await db.funnelPage.findFirst({
-    where: { id: searchParams.funnelPageId },
+    where: { id: searchParams.funnelPageId }
   });
 
   if (!funnelPage)
@@ -57,6 +59,10 @@ const EditorPage = async ({ searchParams }: Props) => {
           funnelPage={funnelPage}
           subAccountId={searchParams.subAccountId}
         />
+
+        <FunnelEditor />
+
+        <FunnelEditorSidebar subAccountId={searchParams.subAccountId} />
       </ClientOnly>
     </div>
   );
