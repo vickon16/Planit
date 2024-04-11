@@ -10,21 +10,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import CustomForm from "./custom-form";
 import { TEditor, TEditorElement } from "@/hooks/use-editor";
+import { defaultPageElement } from "@/lib/constants";
 
 interface Props {
   data: Partial<FunnelPage>;
   funnelId: string;
 }
-
-const pageElements : TEditorElement[] = [
-  {
-    content: [],
-    id: "__body",
-    name: "Body",
-    styles: { backgroundColor: "white" },
-    type: "__body",
-  },
-]
 
 const CreateFunnelPage = ({ data, funnelId }: Props) => {
   const router = useRouter();
@@ -36,7 +27,7 @@ const CreateFunnelPage = ({ data, funnelId }: Props) => {
       name: data?.name || "",
       pathName: data?.pathName || "",
       order: data?.order || 0,
-      elements : data?.elements || JSON.stringify(pageElements)
+      elements: data?.elements || JSON.stringify(defaultPageElement),
     },
   });
 
@@ -97,7 +88,6 @@ const CreateFunnelPage = ({ data, funnelId }: Props) => {
             formLabel="Path Name"
             placeholder="Path for the page..."
             disabled={isLoading}
-            isRequired
           />
         </div>
 

@@ -2,7 +2,7 @@
 
 import useEditor, { TDeviceTypes } from "@/hooks/use-editor";
 import { appLinks } from "@/lib/appLinks";
-import { cn } from "@/lib/utils";
+import { cn, zPriority } from "@/lib/utils";
 import { FunnelPage } from "@prisma/client";
 import {
   ArrowLeftCircle,
@@ -11,6 +11,7 @@ import {
   Redo2,
   Smartphone,
   Tablet,
+  Trash,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +20,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FocusEventHandler, useEffect } from "react";
 import { toast } from "sonner";
-import { updateFunnelPage } from "@/lib/queries";
+import { clearFunnelPageElements, updateFunnelPage } from "@/lib/queries";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -27,10 +28,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TFunnelPageGetPayload } from "@/lib/types";
+import ConfirmActionModal from "@/components/global/confirm-action-modal";
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useMutation } from "@tanstack/react-query";
 
 type Props = {
-  funnelPage: FunnelPage;
+  funnelPage: TFunnelPageGetPayload;
   subAccountId: string;
 };
 
@@ -45,11 +50,25 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
     changeDeviceType,
     undoAction,
     redoAction,
+    resetStore,
   } = useEditor();
 
   useEffect(() => {
     if (!!funnelPage && !!subAccountId) initFunnel(funnelPage, subAccountId);
   }, [funnelPage, subAccountId, initFunnel]);
+
+  const clearElementMutations = useMutation({
+    mutationFn: async () => await clearFunnelPageElements(funnelPage.id),
+    onSuccess: () => {
+      resetStore(funnelPage.id, subAccountId);
+      toast("Element Cleared Successfully");
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error("Error clearing elements");
+      console.log(error);
+    },
+  });
 
   const handleOnBlurTitleChange: FocusEventHandler<HTMLInputElement> = async (
     event
@@ -78,10 +97,12 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
   };
 
   const handleSave = async () => {
-    const elements = JSON.stringify(editor.elements);
+    const elements = JSON.stringify(editor.elementBody);
     try {
       await updateFunnelPage(funnelPage.id, {
-        ...funnelPage,
+        name: funnelPage.name,
+        order: funnelPage.order,
+        pathName: funnelPage.pathName,
         elements,
       });
 
@@ -90,6 +111,9 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
       });
 
       router.refresh();
+      router.push(
+        `${appLinks.subDomain}/${funnelPage.funnel.subDomainName}/${funnelPage.pathName}`
+      );
     } catch (error) {
       console.log(error);
       toast.error("Oppse! Could not save editor");
@@ -176,6 +200,24 @@ const FunnelEditorNavigation = ({ funnelPage, subAccountId }: Props) => {
         </aside>
 
         <aside className="flex items-center gap-2">
+          <ConfirmActionModal
+            heading="Are you sure you want to delete this Agency team member?"
+            description="This action cannot be undone. The Team Member information would be erased from the database."
+            isLoadingConfirmAction={clearElementMutations.isPending}
+            confirmAction={clearElementMutations.mutate}
+            confirmActionLabel="Delete"
+
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertDialogTrigger asChild>
+                  <Trash />
+                </AlertDialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Clear Elements</TooltipContent>
+            </Tooltip>
+          </ConfirmActionModal>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

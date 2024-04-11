@@ -69,3 +69,7 @@ export type TTagGetPayload = Prisma.TagGetPayload<{
 export type TFunnelGetPayload = Prisma.FunnelGetPayload<{
   include: { funnelPages: true; classNames: true };
 }>;
+
+export type TFunnelPageGetPayload = Prisma.FunnelPageGetPayload<{
+  include : {funnel : true}
+}>

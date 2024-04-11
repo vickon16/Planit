@@ -1,21 +1,21 @@
 "use client";
 
-import useDisplayModal from "@/hooks/use-display-modal";
-import { TFunnelGetPayload } from "@/lib/types";
-import { FunnelPage } from "@prisma/client";
-import { Check, ExternalLink, LucideEdit, Plus } from "lucide-react";
-import { useState } from "react";
-import FunnelStepsCard from "./funnel-steps-card";
 import Heading from "@/components/heading";
 import { Button } from "@/components/ui/button";
-import CustomModal from "../global/custom-modal";
-import CreateFunnelPage from "../forms/create-funnel-page";
-import { DragDropContext, DropResult, Droppable } from "@hello-pangea/dnd";
-import { updateFunnelPagesOrder } from "@/lib/queries";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import useDisplayModal from "@/hooks/use-display-modal";
 import { appLinks } from "@/lib/appLinks";
+import { updateFunnelPagesOrder } from "@/lib/queries";
+import { TFunnelGetPayload } from "@/lib/types";
+import { DragDropContext, DropResult, Droppable } from "@hello-pangea/dnd";
+import { FunnelPage } from "@prisma/client";
+import { ExternalLink, LucideEdit, Plus } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import CreateFunnelPage from "../forms/create-funnel-page";
+import CustomModal from "../global/custom-modal";
 import FunnelPagePlaceholder from "../icons/funnel-page-placeholder";
+import FunnelStepsCard from "./funnel-steps-card";
 
 type Props = {
   funnel: TFunnelGetPayload;

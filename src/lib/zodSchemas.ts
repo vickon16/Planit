@@ -127,3 +127,10 @@ export const funnelPageFormSchema = z.object({
 });
 
 export type TFunnelPageFormSchema = z.infer<typeof funnelPageFormSchema>;
+
+export const contactFormSchema = z.object({
+  name: z.string().min(1),
+  email : z.string().email(),
+});
+
+export type TContactFormSchema = z.infer<typeof contactFormSchema>;

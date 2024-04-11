@@ -243,7 +243,6 @@ const SubAccountDetails = ({ agencyId, data, isSubAccountOwner }: Props) => {
                   }
                   onWheel={(event) => event.currentTarget.blur()}
                   min={1}
-                  max={10}
                   className="!bg-background !border !border-input my-2"
                   placeholder="Sub Account Goal"
                 />

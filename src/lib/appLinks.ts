@@ -4,6 +4,7 @@ export const appLinks = {
   subscriptionPlan : "/site/subscription-plan",
   signIn : "/auth/sign-in",
   signUp : "/auth/sign-up",
+  subDomain : "/sub-domain",
 
   // private
   agency : "/agency",

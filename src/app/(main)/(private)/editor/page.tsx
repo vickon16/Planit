@@ -39,7 +39,8 @@ const EditorPage = async ({ searchParams }: Props) => {
   }
 
   const funnelPage = await db.funnelPage.findFirst({
-    where: { id: searchParams.funnelPageId }
+    where: { id: searchParams.funnelPageId },
+    include : {funnel : true}
   });
 
   if (!funnelPage)
@@ -54,16 +55,16 @@ const EditorPage = async ({ searchParams }: Props) => {
         zPriority.pr4
       )}
     >
-      <ClientOnly>
-        <FunnelEditorNavigation
-          funnelPage={funnelPage}
-          subAccountId={searchParams.subAccountId}
-        />
+        <ClientOnly>
+          <FunnelEditorNavigation
+            funnelPage={funnelPage}
+            subAccountId={searchParams.subAccountId}
+          />
 
-        <FunnelEditor />
+          <FunnelEditor />
 
-        <FunnelEditorSidebar subAccountId={searchParams.subAccountId} />
-      </ClientOnly>
+          <FunnelEditorSidebar subAccountId={searchParams.subAccountId} />
+        </ClientOnly>
     </div>
   );
 };

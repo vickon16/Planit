@@ -251,7 +251,6 @@ const AgencyDetails = ({ data, isAgencyOwner }: Props) => {
                     form.setValue("goal", Boolean(Number(value)) ? value : undefined)
                   }
                   min={1}
-                  max={10}
                   className="!bg-background !border !border-input my-2"
                   placeholder="Agency Goal"
                   onWheel={(event) => event.currentTarget.blur()}

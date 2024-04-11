@@ -9,18 +9,14 @@ import { TEditorButtons } from "@/hooks/use-editor";
 import { Separator } from "@/components/ui/separator";
 import {
   Contact2Icon,
+  Image,
   Link2Icon,
   LucideIcon,
+  Mouse,
   Play,
   TypeIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-// import ContainerPlaceholder from './container-placeholder'
-// import VideoPlaceholder from './video-placeholder'
-// import TwoColumnsPlaceholder from './two-columns-placeholder'
-// import LinkPlaceholder from './link-placeholder'
-// import ContactFormComponentPlaceholder from './contact-form-placeholder'
-// import CheckoutPlaceholder from './checkout-placeholder'
 
 type ComponentTabType = "Layout" | "Element";
 
@@ -40,6 +36,13 @@ const elements: {
     group: "Element",
   },
   {
+    className: "flex items-center justify-center",
+    icon: Mouse,
+    label: "Button",
+    id: "button",
+    group: "Element",
+  },
+  {
     className: "flex flex-row gap-[4px]",
     withoutIconClassName:
       "border-dashed border-[1px] h-full rounded-sm bg-muted border-muted-foreground/50 w-full",
@@ -56,11 +59,26 @@ const elements: {
     group: "Layout",
   },
   {
+    className: "flex flex-row gap-[4px]",
+    withoutIconClassName:
+      "border-dashed border-[1px] h-full rounded-sm bg-muted border-muted-foreground/50 w-full",
+    label: "3 Columns",
+    id: "3Col",
+    group: "Layout",
+  },
+  {
     icon: Play,
     className: "flex items-center justify-center",
     label: "Video",
     id: "video",
     group: "Layout",
+  },
+  {
+    icon: Image,
+    className: "flex items-center justify-center",
+    label: "Image",
+    id: "image",
+    group: "Element",
   },
   {
     icon: Contact2Icon,
@@ -96,7 +114,6 @@ const AccordionItemComponent = ({
           .filter((element) => element.group === itemType)
           .map((element) => (
             <div
-
               draggable
               onDragStart={(e) => handleDragState(e, element.id)}
               className="flex flex-col gap-y-1 items-center cursor-grab"
@@ -116,6 +133,12 @@ const AccordionItemComponent = ({
                     <div className={element.withoutIconClassName} />
                     {element.id === "2Col" && (
                       <div className={element.withoutIconClassName} />
+                    )}
+                    {element.id === "3Col" && (
+                      <>
+                        <div className={element.withoutIconClassName} />
+                        <div className={element.withoutIconClassName} />
+                      </>
                     )}
                   </>
                 )}

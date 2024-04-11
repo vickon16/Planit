@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import useEditor from "@/hooks/use-editor";
-import { cn } from "@/lib/utils";
-import { FunnelPage } from "@prisma/client";
+import { cn, handleDropOnContainerElement, zPriority } from "@/lib/utils";
 import { EyeOff } from "lucide-react";
 import { useEffect } from "react";
+import CommonBadge from "./components/common-badge";
 import Recursive from "./components/recursive";
 
 type Props = {
@@ -13,11 +13,14 @@ type Props = {
 };
 
 const FunnelEditor = ({ liveMode }: Props) => {
-  const { toggleLiveMode, togglePreviewMode, editor } = useEditor();
+  const { addElement, toggleLiveMode, togglePreviewMode, editor } = useEditor();
 
   useEffect(() => {
-    if (liveMode) toggleLiveMode(true);
-  }, [liveMode, toggleLiveMode]);
+    if (liveMode) {
+      toggleLiveMode(true);
+      togglePreviewMode(true);
+    };
+  }, [liveMode, toggleLiveMode, togglePreviewMode]);
 
   const handleUnPreview = () => {
     toggleLiveMode(false);
@@ -25,10 +28,10 @@ const FunnelEditor = ({ liveMode }: Props) => {
   };
 
   return (
-    <section className="h-full flex items-center flex-col">
+    <section className="flex items-center flex-col h-full">
       <div
         className={cn(
-          "animate-automation-zoom-in h-full overflow-auto pr-[380px] bg-background transition-all rounded-md ",
+          "animate-automation-zoom-in pr-[380px] overflow-hidden bg-background transition-all rounded-md ",
           {
             "!p-0 !mr-0":
               editor.previewMode === true || editor.liveMode === true,
@@ -38,20 +41,39 @@ const FunnelEditor = ({ liveMode }: Props) => {
           }
         )}
       >
-        {(editor.previewMode || editor.liveMode) && (
+        {(editor.previewMode && editor.liveMode) && (
           <Button
             variant={"ghost"}
             size={"icon"}
-            className="w-6 h-6 bg-slate-600 p-[2px] fixed top-2 left-2"
+            className={cn(
+              "w-6 h-6 bg-slate-600 p-[2px] fixed top-2 left-2",
+              zPriority.pr4
+            )}
             onClick={handleUnPreview}
           >
             <EyeOff />
           </Button>
         )}
 
-        <div className="w-full h-full">
-          {Array.isArray(editor.elements) &&
-            editor.elements.map((childElement) => (
+        {/* element body */}
+        <div
+          className={cn(
+            "bg-white p-2 space-y-2 w-full max-w-full h-full min-h-screen overflow-auto relative pb-32"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+          }}
+          onDrop={(e) => handleDropOnContainerElement(e, addElement, "__body")}
+        >
+          {(!editor.previewMode && !editor.liveMode) && (
+            <CommonBadge
+              text="body"
+              className="top-0 left-0 transform-none h-fit"
+            />
+          )}
+
+          {Array.isArray(editor.elementBody.content) &&
+            editor.elementBody.content.map((childElement) => (
               <Recursive key={childElement.id} element={childElement} />
             ))}
         </div>

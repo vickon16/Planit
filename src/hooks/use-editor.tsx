@@ -1,3 +1,4 @@
+import { manageHistory } from "@/lib/utils";
 import { FunnelPage } from "@prisma/client";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -5,10 +6,10 @@ import { createJSONStorage, persist } from "zustand/middleware";
 export type TDeviceTypes = "Desktop" | "Mobile" | "Tablet";
 export type TEditorButtons =
   | "text"
+  | "button"
   | "container"
   | "section"
   | "contactForm"
-  | "paymentForm"
   | "link"
   | "2Col"
   | "video"
@@ -22,13 +23,14 @@ export type TEditorElement = {
   styles: React.CSSProperties;
   name: string;
   type: TEditorButtons;
-  content:
-    | TEditorElement[]
-    | { href?: string; innerText?: string; src?: string };
+  href?: string;
+  innerText?: string;
+  src?: string;
+  content: TEditorElement[];
 };
 
 export type TEditor = {
-  elements: TEditorElement[];
+  elementBody: TEditorElement;
   selectedElement: TEditorElement;
   liveMode: boolean;
   device: TDeviceTypes;
@@ -43,15 +45,13 @@ export type THistory = {
 };
 
 const initialEditorState: TEditor = {
-  elements: [
-    {
-      content: [],
-      id: "",
-      name: "",
-      styles: {},
-      type: "__body",
-    },
-  ],
+  elementBody: {
+    content: [],
+    id: "",
+    name: "",
+    styles: {},
+    type: "__body",
+  },
   selectedElement: {
     id: "",
     content: [],
@@ -71,14 +71,15 @@ const initialHistoryState: THistory = {
   currentIndex: 0,
 };
 
-type TEditorStore = {
+export type TEditorStore = {
   editor: TEditor;
   history: THistory;
   initFunnel: (funnelPage: FunnelPage, subAccountId: string) => void;
 
   // Crud Element
-  addElement : (element : TEditorElement, toElementId : string) => void;
-  deleteElement: (element: TEditorElement) => void;
+  addElement: (element: TEditorElement, toElementId: string) => void;
+  updateElement: (element: TEditorElement) => void;
+  deleteElement: (elementId: string) => void;
 
   undoAction: () => void;
   redoAction: () => void;
@@ -86,26 +87,9 @@ type TEditorStore = {
   toggleLiveMode: (mode?: boolean) => void;
   changeDeviceType: (deviceType: TDeviceTypes) => void;
   changeClickedElement: (element: TEditorElement) => void;
+
+  resetStore: (funnelPageId : string, subAccountId : string) => void;
 };
-
-const manageHistory = (get : () => TEditorStore, set : any, newState : TEditor) => {
-  const newHistoryState = [
-    ...get().history.historyArray.slice(
-      0,
-      get().history.currentIndex + 1
-    ),
-    newState,
-  ];
-
-  set({
-    editor: newState,
-    history: {
-      ...get().history,
-      historyArray: newHistoryState,
-      currentIndex: newHistoryState.length - 1,
-    },
-  });
-}
 
 const useEditor = create(
   persist<TEditorStore>(
@@ -127,7 +111,7 @@ const useEditor = create(
           ...get().editor,
           subAccountId,
           funnelPageId: funnelPage.id,
-          elements: JSON.parse(funnelPage.elements),
+          elementBody: JSON.parse(funnelPage.elements),
         };
 
         set({
@@ -141,30 +125,102 @@ const useEditor = create(
 
       addElement: (element, toElementId) => {
         // the "toElementId should already be in the editor";
-        const newElementsArray = get().editor.elements.map(singleElement => {
-          if (singleElement.id === toElementId && Array.isArray(singleElement.content)) {
-            return {
-              ...singleElement,
-              content: [...singleElement.content, element]
-            }
-          }
-          return singleElement;
-        })
- 
-        const newEditor = { ...get().editor, elements: newElementsArray };
-        manageHistory(get, set, newEditor)
+        let newEditor: TEditor;
+
+        if (toElementId === "__body") {
+          newEditor = {
+            ...get().editor,
+            elementBody: {
+              ...get().editor.elementBody,
+              content: [...get().editor.elementBody.content, element],
+            },
+          };
+        } else {
+          const recursiveFunction = (
+            elementContent: TEditorElement[]
+          ): TEditorElement[] => {
+            return elementContent.map((singleElement) => {
+              if (singleElement.id === toElementId) {
+                return {
+                  ...singleElement,
+                  content: [...singleElement.content, element],
+                };
+              } else if (singleElement.content.length > 0) {
+                return {
+                  ...singleElement,
+                  content: recursiveFunction(singleElement.content),
+                };
+              }
+              return singleElement;
+            });
+          };
+
+          newEditor = {
+            ...get().editor,
+            elementBody: {
+              ...get().editor.elementBody,
+              content: recursiveFunction(get().editor.elementBody.content),
+            },
+          };
+        }
+
+        manageHistory(get, set, newEditor);
       },
 
-      deleteElement: (element) => {
-        console.log(element.id)
-        const newElementsArray = get().editor.elements.filter(
-          (e) => e.id !== element.id
-        );
+      updateElement: (element) => {
+        // the "toElementId should already be in the editor";
+        let newEditor: TEditor;
 
-        console.log("hey");
+        const recursiveFunction = (
+          elementContent: TEditorElement[]
+        ): TEditorElement[] => {
+          return elementContent.map((singleElement) => {
+            if (singleElement.id === element.id) {
+              return { ...singleElement, ...element };
+            } else if (singleElement.content.length > 0) {
+              return {
+                ...singleElement,
+                content: recursiveFunction(singleElement.content),
+              };
+            }
+            return singleElement;
+          });
+        };
 
-        const newEditor = { ...get().editor, elements: newElementsArray };
-        manageHistory(get, set, newEditor)
+        newEditor = {
+          ...get().editor,
+          elementBody: {
+            ...get().editor.elementBody,
+            content: recursiveFunction(get().editor.elementBody.content),
+          },
+          selectedElement: element,
+        };
+
+        manageHistory(get, set, newEditor);
+      },
+
+      deleteElement: (elementId) => {
+        const recursiveFunction = (
+          elementContent: TEditorElement[]
+        ): TEditorElement[] => {
+          return elementContent.filter((singleElement) => {
+            if (singleElement.id === elementId) return false;
+            else if (singleElement.content.length > 0) {
+              singleElement.content = recursiveFunction(singleElement.content);
+            }
+            return true;
+          });
+        };
+
+        const newEditor: TEditor = {
+          ...get().editor,
+          elementBody: {
+            ...get().editor.elementBody,
+            content: recursiveFunction(get().editor.elementBody.content),
+          },
+        };
+
+        manageHistory(get, set, newEditor);
       },
 
       undoAction: () => {
@@ -212,8 +268,23 @@ const useEditor = create(
         const selectedElement = get().editor.selectedElement;
         if (selectedElement.id === element.id) return null;
 
-        const newEditor = { ...get().editor, selectedElement: element };
-        manageHistory(get, set, newEditor)
+        set({
+          editor: { ...get().editor, selectedElement: element },
+        });
+      },
+
+      resetStore: (funnelPageId, subAccountId) => {
+        set({
+          editor: {
+            ...initialEditorState,
+            funnelPageId: funnelPageId,
+            subAccountId,
+          },
+          history: {
+            historyArray: [initialEditorState],
+            currentIndex: 0,
+          },
+        });
       },
     }),
 

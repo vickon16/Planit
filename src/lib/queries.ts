@@ -1,7 +1,5 @@
 "use server";
 
-import { appLinks } from "./appLinks";
-import { db } from "./db";
 import {
   Agency,
   FunnelPage,
@@ -13,24 +11,26 @@ import {
   Ticket,
   User,
 } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { v4 } from "uuid";
+import { appLinks } from "./appLinks";
 import { getCustomSession } from "./auth-actions";
+import { db } from "./db";
+import { InvitationStatus, TPlanitAccounts } from "./types";
 import {
   TAgencyFormSchema,
+  TContactFormSchema,
   TFunnelFormSchema,
   TFunnelPageFormSchema,
   TLaneFormSchema,
   TMediaFormSchema,
   TPipelineFormSchema,
   TSubAccountFormSchema,
-  TTagFormSchema,
   TTicketFormSchema,
   TUserInvitationSchema,
 } from "./zodSchemas";
-import { v4 } from "uuid";
-import { revalidatePath } from "next/cache";
-import { InvitationStatus, TPlanitAccounts } from "./types";
-import { redirect } from "next/navigation";
-import { uniqueObjects } from "./utils";
+import { defaultPageElement } from "./constants";
 
 const checkSession = async () => {
   const session = await getCustomSession();
@@ -683,7 +683,7 @@ export const getMedia = async (type: TPlanitAccounts, accountId: string) => {
         },
       },
     });
-    
+
     media = subAccount?.agency.planitAccount?.planitMedia?.filter(
       (media) => media.mediaType === "SUBACCOUNT_MEDIA"
     );
@@ -769,6 +769,40 @@ export const getContacts = async (subAccountId: string) => {
   });
 
   return contacts;
+};
+
+export const addContact = async (
+  subAccountId: string,
+  contactDetails: TContactFormSchema
+) => {
+  const user = await checkSession();
+
+  const contact = await db.contact.findFirst({
+    where: { subAccountId },
+  });
+
+  if (!contact) {
+    const newContact = await db.contact.create({
+      data: {
+        ...contactDetails,
+        subAccountId,
+      },
+      include: { subAccount: true },
+    });
+
+    await db.notification.create({
+      data: {
+        notification: `${user.name} | Contact lead ${contactDetails.email} has joined us`,
+        agencyId: newContact.subAccount.agencyId,
+        subAccountId: newContact.subAccount.id,
+      },
+    });
+  } else {
+    await db.contact.update({
+      where: { id: contact.id },
+      data: contactDetails,
+    });
+  }
 };
 
 export const deleteContact = async (contactId: string) => {
@@ -951,6 +985,16 @@ export const deleteTicket = async (ticketId: string) => {
 // Tag
 
 // Funnel
+
+export const getFunnel = async (funnelId : string) => {
+  const funnel = await db.funnel.findUnique({
+    where : {id : funnelId},
+    include : {funnelPages : {orderBy : {order : "asc"}}}
+  })
+
+  return funnel;
+} 
+
 export const createFunnel = async (
   subAccountId: string,
   values: TFunnelFormSchema
@@ -1017,7 +1061,7 @@ export const createFunnelPage = async (
       ...values,
       funnelId,
     },
-    include: { Funnel: { include: { subAccount: true } } },
+    include: { funnel: { include: { subAccount: true } } },
   });
 };
 
@@ -1035,7 +1079,7 @@ export const updateFunnelPage = async (
   await db.funnelPage.update({
     where: { id: funnelPageId },
     data: values,
-    include: { Funnel: { include: { subAccount: true } } },
+    include: { funnel: { include: { subAccount: true } } },
   });
 };
 
@@ -1058,6 +1102,14 @@ export const deleteFunnelPage = async (funnelPageId: string) => {
   await checkSession();
   await db.funnelPage.delete({
     where: { id: funnelPageId },
-    include: { Funnel: { include: { subAccount: true } } },
+    include: { funnel: { include: { subAccount: true } } },
   });
 };
+
+export const clearFunnelPageElements = async (funnelPageId: string) => {
+  await checkSession();
+  await db.funnelPage.update({
+    where : {id : funnelPageId},
+    data : {elements : JSON.stringify(defaultPageElement)}
+  })
+}

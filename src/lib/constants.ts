@@ -27,6 +27,7 @@ import Tune from "@/components/icons/tune";
 import Video from "@/components/icons/video_recorder";
 import Wallet from "@/components/icons/wallet";
 import Warning from "@/components/icons/warning";
+import { TEditorElement } from "@/hooks/use-editor";
 import { SubscriptionPlan } from "@prisma/client";
 
 export const appConstants = {
@@ -235,6 +236,15 @@ export const defaultStyles: React.CSSProperties = {
   opacity: "100%",
 };
 
+
+export const defaultPageElement: TEditorElement = {
+  content: [],
+  id: "__body",
+  name: "Body",
+  styles: {},
+  type: "__body",
+};
+
 export const agencyIdSideBarOptions = [
   {
     name: "Dashboard",
@@ -298,5 +308,56 @@ export const subAccountIdSideBarOptions = [
     name: "Contacts",
     icon: "person",
     link: `contacts`,
+  },
+];
+
+
+
+export const fakeDataSessions = [
+  {
+    id: "1",
+    created: new Date(
+      new Date().getTime() + 2 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 200,
+  },
+  {
+    id: "2",
+    created: new Date(
+      new Date().getTime() + 5 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 500,
+  },
+  {
+    id: "3",
+    created: new Date(
+      new Date().getTime() + 10 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 1200,
+  },
+];
+
+
+export const fakeDataPendingSessions = [
+  {
+    id: "1",
+    created: new Date(
+      new Date().getTime() + 12 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 1300,
+  },
+  {
+    id: "2",
+    created: new Date(
+      new Date().getTime() + 18 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 900,
+  },
+  {
+    id: "3",
+    created: new Date(
+      new Date().getTime() + 20 * 60 * 60 * 1000
+    ).toLocaleDateString(),
+    amount_total: 2200,
   },
 ];
