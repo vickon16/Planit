@@ -1,5 +1,5 @@
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
@@ -348,7 +348,7 @@ model FunnelPage {
   name         String
   pathName     String  @default("")
   visits       Int     @default(0)
-  elements      String @db.LongText
+  elements      String @db.Text
   order        Int
   previewImage String? @db.Text
   funnelId     String
