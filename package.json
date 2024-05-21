@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
@@ -39,6 +39,7 @@
     "@tanstack/react-table": "^8.13.2",
     "@tremor/react": "^3.14.1",
     "@uploadthing/react": "^6.2.4",
+    "@vercel/postgres": "^0.8.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
